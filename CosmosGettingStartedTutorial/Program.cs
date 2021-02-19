@@ -33,7 +33,7 @@ namespace CosmosGettingStartedTutorial
         {
             try
             {
-                Console.WriteLine("Beginning operations...\n");
+                Console.WriteLine("Beginning ops...\n");
                 Program p = new Program();
                 await p.GetStartedDemoAsync();
 
