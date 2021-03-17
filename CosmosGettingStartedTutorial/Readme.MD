@@ -1,21 +1,23 @@
 ﻿---
-                 |           |
+
 # Ristos Cosmos /|\ Getting /|\ Started
-                 |           |
 
-### Based on Microsofts CosmosGettingStarted sample - Tuned up with streams, separate props, etc..
----
 
-# So whats Custom Code
+Based on ['CosmosGettingStarted'](https://github.com/Azure-Samples/cosmos-dotnet-getting-started/blob/main/CosmosGettingStarted.sln) sample by Microsoft, SDK v3.0.
+Customised up with streams, separate options, etc..
 
-1. Using the Emulator. Add whole connection string to AppSettings (CS).
 
-2. Adding new Client; cosmosEmuClient, with a short timeout.
+
+### So whats Custom Code
+
+1. Using the Emulator. Add proper connection string to AppSettings (CS).
+
+2. Adding new Client; cosmosEmuClient, with a very short timeout.
 
 3. Streaming away - How to get rid of ugly 'exception as if' code?
 
 ---
-
+### Linking
     // Main source
     // https://github.com/Azure/azure-cosmos-dotnet-v3/blob/master/Microsoft.Azure.Cosmos.Samples/Usage/ItemManagement/Program.cs
     // https://github.com/Azure/azure-cosmos-dotnet-v3/blob/master/Microsoft.Azure.Cosmos/src/CosmosClient.cs
@@ -30,9 +32,13 @@
     // https://github.com/Azure/azure-cosmos-table-dotnetMicrosoft
 
 
+
+
+### [Emulator URI](https://localhost:8081/_explorer/index.html)
+#### Or
+### https://localhost:8081/_explorer/index.html
 ---
-## Link to Emulator
-https://localhost:8081/_explorer/index.html
+
 ---
 
 # Developing a .NET console app using Azure Cosmos DB
