@@ -7,6 +7,21 @@ using Microsoft.Azure.Cosmos;
 
 namespace CosmosGettingStartedTutorial
 {
+
+    // Main source
+    // https://github.com/Azure/azure-cosmos-dotnet-v3/blob/master/Microsoft.Azure.Cosmos.Samples/Usage/ItemManagement/Program.cs
+    // https://github.com/Azure/azure-cosmos-dotnet-v3/blob/master/Microsoft.Azure.Cosmos/src/CosmosClient.cs
+
+
+    // Guidance 
+    // https://github.com/MicrosoftLearning/20777A---Implementing-Microsoft-Azure-Cosmos-DB-Solutions/blob/master/Instructions/20777A_LAB_01_AK.md
+    // https://github.com/MicrosoftLearning/20777A---Implementing-Microsoft-Azure-Cosmos-DB-Solutions/blob/master/Instructions/20777A_LAB_01_AK.md
+
+
+    // Read - Azure Cosmos DB Table API
+    // https://github.com/Azure/azure-cosmos-table-dotnetMicrosoft
+
+
     class Program
     {
         // The Azure Cosmos DB endpoint for running this sample.
@@ -108,12 +123,33 @@ namespace CosmosGettingStartedTutorial
         /// Specifiy "/LastName" as the partition key since we're storing family information, to ensure good distribution of requests and storage.
         /// </summary>
         /// <returns></returns>
-        private async Task CreateContainerAsync()
+        private async Task CreateContainerAsyncOld()
         {
             // Create a new container
             this.container = await this.database.CreateContainerIfNotExistsAsync(containerId, "/LastName", 400);
             Console.WriteLine("Created Container: {0}\n", this.container.Id);
         }
+
+        /// <summary>
+        /// Creates the container asynchronously - separation of properties!
+        /// </summary>
+        public async Task CreateContainerAsync()
+        {
+            ContainerProperties containerProperties = new ContainerProperties()
+            {
+                Id = Guid.NewGuid().ToString(),
+                PartitionKeyPath = "/LastName",
+                DefaultTimeToLive = (int)TimeSpan.FromMinutes(60).TotalSeconds, //expire in 1 hour
+                IndexingPolicy = new IndexingPolicy()
+                {
+                    Automatic = false,
+                    IndexingMode = IndexingMode.Lazy,
+                },
+            };
+
+            this.container = await this.database.CreateContainerIfNotExistsAsync(containerProperties, 400);
+        }
+
         // </CreateContainerAsync>
 
         // <ScaleContainerAsync>
@@ -170,6 +206,10 @@ namespace CosmosGettingStartedTutorial
                 Address = new Address { State = "WA", County = "King", City = "Seattle" },
                 IsRegistered = false
             };
+
+            //check streams!
+            //https://github.com/Azure/azure-cosmos-dotnet-v3/blob/master/Microsoft.Azure.Cosmos.Samples/Usage/ItemManagement/Program.cs
+
 
             try
             {
@@ -237,6 +277,68 @@ namespace CosmosGettingStartedTutorial
                 Console.WriteLine("Created item in database with id: {0} Operation consumed {1} RUs.\n", wakefieldFamilyResponse.Resource.Id, wakefieldFamilyResponse.RequestCharge);
             }
         }
+
+
+
+
+
+        /*
+         
+                 // <ReadItemAsync>
+        private static async Task ReadItemAsync()
+        {
+            Console.WriteLine("\n1.2 - Reading Item by Id");
+
+            // Note that Reads require a partition key to be specified.
+            ItemResponse<SalesOrder> response = await container.ReadItemAsync<SalesOrder>(
+                partitionKey: new PartitionKey("Account1"),
+                id: "SalesOrder1");
+
+            // Log the diagnostics
+            Console.WriteLine($"Diagnostics for ReadItemAsync: {response.Diagnostics.ToString()}");
+
+            // You can measure the throughput consumed by any operation by inspecting the RequestCharge property
+            Console.WriteLine("Item read by Id {0}", response.Resource);
+            Console.WriteLine("Request Units Charge for reading a Item by Id {0}", response.RequestCharge);
+
+            SalesOrder readOrder = (SalesOrder)response;
+
+            // Read the same item but as a stream.
+            using (ResponseMessage responseMessage = await container.ReadItemStreamAsync(
+                partitionKey: new PartitionKey("Account1"),
+                id: "SalesOrder1"))
+            {
+                // Item stream operations do not throw exceptions for better performance
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    SalesOrder streamResponse = FromStream<SalesOrder>(responseMessage.Content);
+                    Console.WriteLine($"\n1.2.2 - Item Read {streamResponse.Id}");
+
+                    // Log the diagnostics
+                    Console.WriteLine($"\n1.2.2 - Item Read Diagnostics: {responseMessage.Diagnostics.ToString()}");
+                }
+                else
+                {
+                    Console.WriteLine($"Read item from stream failed. Status code: {responseMessage.StatusCode} Message: {responseMessage.ErrorMessage}");
+                }
+            }
+        }
+         
+         
+         */
+
+
+
+
+
+
+
+
+
+
+
+
+
         // </AddItemsToContainerAsync>
 
         // <QueryItemsAsync>
@@ -264,7 +366,45 @@ namespace CosmosGettingStartedTutorial
                     Console.WriteLine("\tRead {0}\n", family);
                 }
             }
+
+            //OR MAYBE ???:
+            //await foreach (var family in currentResultSet)
+            //{
+            //    families.Add(family);
+            //}
+
+
+            //TODO: return Task<List<Family>> => return families;
         }
+
+
+        //TODO: Bulk ops
+        //public async Task AddOrders(List<Order> orders, string customerId)
+        //{
+        //    var ordersToInsert = new List<KeyValuePair<PartitionKey, Stream>>();
+        //    foreach (var order in orders)
+        //    {
+        //        var stream = new MemoryStream();
+        //        await JsonSerializer.SerializeAsync(stream, order);
+        //        ordersToInsert.Add(new KeyValuePair<PartitionKey, Stream>(new PartitionKey(order.CustomerId), stream));
+        //    }
+
+        //    var parallelTasks = new List<Task>();
+
+        //    foreach (var (key, value) in ordersToInsert)
+        //    {
+        //        parallelTasks.Add(this._cosmosDbContext.OrdersContainer.CreateItemStreamAsync(value, key)
+        //        .ContinueWith(x =>
+        //        {
+        //            var response = x.Result;
+        //            Console.WriteLine($"Bulk insert {response.ClientRequestId} has status {response.Status} with message {response}");
+        //        }));
+        //    }
+        //    await Task.WhenAll(parallelTasks);
+        //}
+
+
+
         // </QueryItemsAsync>
 
         // <ReplaceFamilyItemAsync>
