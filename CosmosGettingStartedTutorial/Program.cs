@@ -15,6 +15,8 @@ namespace CosmosGettingStartedTutorial
         // The primary key for the Azure Cosmos account.
         private static readonly string PrimaryKey = ConfigurationManager.AppSettings["PrimaryKey"];
 
+        private static readonly string CS = ConfigurationManager.AppSettings["CS"];
+
         // The Cosmos client instance
         private CosmosClient cosmosClient;
 
@@ -61,8 +63,22 @@ namespace CosmosGettingStartedTutorial
         /// </summary>
         public async Task GetStartedDemoAsync()
         {
+
+            CosmosClient cosmosEmuClient = new CosmosClient(
+                        CS, 
+                       new CosmosClientOptions()
+                        {
+                           RequestTimeout = new TimeSpan(0,0,5),
+                           ApplicationName = "CosmosDBDotnetQuickstart",
+                           // ApplicationRegion = Regions.EastUS2,
+                       });
+
+            this.database = await cosmosEmuClient.CreateDatabaseIfNotExistsAsync(databaseId);
+            Console.WriteLine("Created Database: {0}\n", this.database.Id);
+
             // Create a new instance of the Cosmos Client
-            this.cosmosClient = new CosmosClient(EndpointUri, PrimaryKey, new CosmosClientOptions() { ApplicationName = "CosmosDBDotnetQuickstart" });
+            this.cosmosClient = cosmosEmuClient;
+            // new CosmosClient(EndpointUri, PrimaryKey, new CosmosClientOptions() { ApplicationName = "CosmosDBDotnetQuickstart" });
             await this.CreateDatabaseAsync();
             await this.CreateContainerAsync();
             await this.ScaleContainerAsync();
