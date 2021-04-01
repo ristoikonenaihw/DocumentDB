@@ -4,9 +4,13 @@ using System.Configuration;
 using System.Collections.Generic;
 using System.Net;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.CosmosElements;
 
 namespace CosmosGettingStartedTutorial
 {
+    
+    // https://github.com/Azure/azure-cosmos-dotnet-v3/blob/540070c96cc50bd9e655e6d0e7bb5cf10e4f8f2a/Microsoft.Azure.Cosmos/tests/Microsoft.Azure.Cosmos.Tests/Scenarios/GremlinScenarioTests.cs#L801
+
     class Program
     {
         // The Azure Cosmos DB endpoint for running this sample.
@@ -63,6 +67,11 @@ namespace CosmosGettingStartedTutorial
         /// </summary>
         public async Task GetStartedDemoAsync()
         {
+
+            var lc = await Data.GetContents();
+            var lr = await Data.GetRelations();
+
+            //CosmosObject edgeEagerObject = CosmosObject.Create(edgeDocumentProperties);
 
             CosmosClient cosmosEmuClient = new CosmosClient(
                         CS, 
@@ -171,6 +180,10 @@ namespace CosmosGettingStartedTutorial
                 IsRegistered = false
             };
 
+            //check streams!
+            //https://github.com/Azure/azure-cosmos-dotnet-v3/blob/master/Microsoft.Azure.Cosmos.Samples/Usage/ItemManagement/Program.cs
+
+
             try
             {
                 // Read the item to see if it exists.  
@@ -237,6 +250,65 @@ namespace CosmosGettingStartedTutorial
                 Console.WriteLine("Created item in database with id: {0} Operation consumed {1} RUs.\n", wakefieldFamilyResponse.Resource.Id, wakefieldFamilyResponse.RequestCharge);
             }
         }
+
+
+        /*
+         
+                 // <ReadItemAsync>
+        private static async Task ReadItemAsync()
+        {
+            Console.WriteLine("\n1.2 - Reading Item by Id");
+
+            // Note that Reads require a partition key to be specified.
+            ItemResponse<SalesOrder> response = await container.ReadItemAsync<SalesOrder>(
+                partitionKey: new PartitionKey("Account1"),
+                id: "SalesOrder1");
+
+            // Log the diagnostics
+            Console.WriteLine($"Diagnostics for ReadItemAsync: {response.Diagnostics.ToString()}");
+
+            // You can measure the throughput consumed by any operation by inspecting the RequestCharge property
+            Console.WriteLine("Item read by Id {0}", response.Resource);
+            Console.WriteLine("Request Units Charge for reading a Item by Id {0}", response.RequestCharge);
+
+            SalesOrder readOrder = (SalesOrder)response;
+
+            // Read the same item but as a stream.
+            using (ResponseMessage responseMessage = await container.ReadItemStreamAsync(
+                partitionKey: new PartitionKey("Account1"),
+                id: "SalesOrder1"))
+            {
+                // Item stream operations do not throw exceptions for better performance
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    SalesOrder streamResponse = FromStream<SalesOrder>(responseMessage.Content);
+                    Console.WriteLine($"\n1.2.2 - Item Read {streamResponse.Id}");
+
+                    // Log the diagnostics
+                    Console.WriteLine($"\n1.2.2 - Item Read Diagnostics: {responseMessage.Diagnostics.ToString()}");
+                }
+                else
+                {
+                    Console.WriteLine($"Read item from stream failed. Status code: {responseMessage.StatusCode} Message: {responseMessage.ErrorMessage}");
+                }
+            }
+        }
+         
+         
+         */
+
+
+
+
+
+
+
+
+
+
+
+
+
         // </AddItemsToContainerAsync>
 
         // <QueryItemsAsync>
@@ -317,5 +389,18 @@ namespace CosmosGettingStartedTutorial
             this.cosmosClient.Dispose();
         }
         // </DeleteDatabaseAndCleanupAsync>
+        //private static CosmosElement CreateVertexPropertyPrimitiveValueElement(object value)
+        //{
+        //    return value switch
+        //    {
+        //        bool boolValue => CosmosBoolean.Create(boolValue),
+        //        double doubleValue => CosmosNumber64.Create(doubleValue),
+        //        float floatValue => CosmosNumber64.Create(floatValue),
+        //        int intValue => CosmosNumber64.Create(intValue),
+        //        long longValue => CosmosNumber64.Create(longValue),
+        //        string stringValue => CosmosString.Create(stringValue),
+        //        _ => throw new AssertFailedException($"Invalid Gremlin property value object type: {value.GetType().Name}."),
+        //    };
+        //}
     }
 }
